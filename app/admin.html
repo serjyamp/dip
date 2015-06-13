@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title>Онлайн-довідник по університету</title>
+	
+	<link href='http://fonts.googleapis.com/css?family=Roboto+Slab:400,700&subset=latin,cyrillic' rel='stylesheet' type='text/css'>
+
+	<link rel="stylesheet" href="assets/vendor/normalize.css">
+	<link rel="stylesheet" href="assets/vendor/font-awesome-4.3.0/css/font-awesome.min.css">
+	<link rel="stylesheet" href="app.min.css">
+
+	<script src="assets/vendor/jquery-1.11.3.min.js"></script>
+	<script src="assets/vendor/jquery.maskedinput.min.js"></script>
+	<script src="js/admin.js"></script>
+</head>
+<body>
+	<div class="container">
+		<div class="admin_header">
+			<h1>"Онлайн-довідник по університету"</h1>
+			<h2>адміністратор <span class="admin_settings_link">налаштування <i class="fa fa-cog"></i></span></h2>
+		</div>
+		<ul class="admin_menu">
+			<li class="am_lessons">Заняття</li>
+			<li class="am_auditoriums">Аудиторії</li>
+			<li class="am_groups">Групи</li>
+			<li class="am_teachers">Викладачі</li>
+			<li class="am_subjects">Предмети</li>
+			<li class="am_bathrooms">Вбиральні</li>
+			<li class="am_buffets">Буфети</li>
+			<li class="am_buildings">Корпуса</li>
+			<li class="am_rooms">Приміщення</li>
+		</ul>
+		
+		<div class="preloader_wr">
+			<img src="assets/img/preloader.gif" alt="" class="preloader">
+		</div>
+
+		<div class="fields_block fields_lessons">
+			<span class="f_label">код предмету</span>
+			<input type="text" class="f_input search_input_digits f_input_code_of_subject" maxlength="11">
+			<span class="f_label">код викладача</span>
+			<input type="text" class="f_input search_input_digits f_input_code_of_teacher" maxlength="11">
+			<span class="f_label">назва групи</span>
+			<input type="text" class="f_input f_input_name_of_group" maxlength="15">
+			<span class="f_label">номер аудиторії</span>
+			<input type="text" class="f_input search_input_auditorium f_input_number_of_auditorium">
+			<span class="f_label">день</span>
+			<select name="" id="" class="day">
+				<option value="понеділок">понеділок</option>
+				<option value="вівторок">вівторок</option>
+				<option value="середа">середа</option>
+				<option value="четвер">четвер</option>
+				<option value="п’ятниця">п’ятниця</option>
+				<option value="субота">субота</option>
+				<option value="неділя">неділя</option>
+			</select>
+			<span class="f_label">пара</span>
+			<select name="" id="" class="period">
+				<option value="1">1</option>
+				<option value="2">2</option>
+				<option value="3">3</option>
+				<option value="4">4</option>
+				<option value="5">5</option>
+				<option value="6">6</option>
+				<option value="7">7</option>
+				<option value="8">8</option>
+			</select>
+			<span class="f_label">тиждень</span>
+			<select class="week">
+				<option value="верхній">верхній</option>
+				<option value="нижній">нижній</option>
+			</select>
+			
+			<button class="f_btn f_add">додати <i class="fa fa-plus-circle"></i></button>
+			
+			<div class="status_wr add_status_wr"></div>
+
+			<div class="status_wr set_status_wr"></div>
+		</div>
+		
+		<div class="fields_block fields_groups">
+			<span class="f_label">Назва групи:</span>
+			<input type="text" class="f_input f_input_group" maxlength="15">
+			<button class="f_btn f_add">додати <i class="fa fa-plus-circle"></i></button>
+			<div class="status_wr add_status_wr"></div>
+		</div>
+		
+		<div class="fields_block fields_buildings">
+			<span class="f_label">Номер корпусу:</span>
+			<input type="text" class="f_input f_input_small search_input_digits f_input_building_number" maxlength="2">
+			<span class="f_label">Кількість поверхів:</span>
+			<input type="text" class="f_input f_input_small search_input_digits f_input_building_floors" maxlength="2">
+			<button class="f_btn f_add">додати <i class="fa fa-plus-circle"></i></button>
+			<div class="status_wr add_status_wr"></div>
+		</div>
+		
+		<div class="fields_block fields_auditoriums">
+			<span class="f_label">Номер аудиторії:</span>
+			<input type="text" class="f_input search_input_auditorium f_input_number_of_auditorium">
+
+			<span class="f_label">розеток</span>
+			<input type="text" class="f_input f_input_small search_input_digits f_input_sockets" maxlength="3" value="10">
+
+			<span class="f_label">місць</span>
+			<input type="text" class="f_input f_input_small search_input_digits f_input_workplaces" maxlength="3" value="10">
+
+			<span class="f_label">проектор</span>
+			<select name="" id="" class="projector">
+				<option value="0">нема</option>
+				<option value="1">є</option>
+			</select>
+
+			<button class="f_btn f_add">додати <i class="fa fa-plus-circle"></i></button>
+			<div class="status_wr add_status_wr"></div>
+		</div>
+
+		<div class="fields_block fields_teachers">
+			<span class="f_label">прізвище</span>
+			<input type="text" class="f_input f_input_lastname">
+			<span class="f_label">ім’я</span>
+			<input type="text" class="f_input f_input_name">
+			<span class="f_label">по батькові</span>
+			<input type="text" class="f_input f_input_patronymic">
+
+			<button class="f_btn f_add">додати <i class="fa fa-plus-circle"></i></button>
+			<div class="status_wr add_status_wr"></div>
+		</div>
+
+		<div class="fields_block fields_subjects">
+			<span class="f_label">назва</span>
+			<input type="text" class="f_input f_input_name_of_subject">
+
+			<button class="f_btn f_add">додати <i class="fa fa-plus-circle"></i></button>
+			<div class="status_wr add_status_wr"></div>
+		</div>
+
+		<div class="fields_controls">
+			<button class="f_btn f_del">видалити <i class="fa fa-trash-o"></i></button>
+			<div class="status_wr del_status_wr"></div>				
+		</div>
+
+		<div class="content_wr"></div>
+	</div>
+</body>
+</html>

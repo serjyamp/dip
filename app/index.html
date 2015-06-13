@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title>Онлайн-довідник по університету</title>
+	
+	<link href='http://fonts.googleapis.com/css?family=Roboto+Slab:400,700&subset=latin,cyrillic' rel='stylesheet' type='text/css'>
+
+	<link rel="stylesheet" href="assets/vendor/normalize.css">
+	<link rel="stylesheet" href="app.min.css">
+
+	<script src="assets/vendor/jquery-1.11.3.min.js"></script>
+	<script src="assets/vendor/jquery.maskedinput.min.js"></script>
+	<script src="js/main.js"></script>
+</head>
+<body>
+	<div class="container">
+		<div class="header">
+			<a href="/">Онлайн-довідник по університету</a>
+		</div>
+		<div class="menu_wr">
+			<ul class="menu_list">
+				<li data-fb="fb_free_auditorium">
+					Вільна аудиторія
+				</li>
+				<li data-fb="fb_teacher">
+					Пошук викладача
+				</li>
+				<li data-fb="fb_group">
+					Пошук групи
+				</li>
+				<li data-fb="fb_auditorium">
+					Пошук аудиторії
+				</li>
+				<li class="menu_active" data-fb="fb_room">
+					Пошук приміщення
+				</li>
+				<li class="menu_buffets_btn" data-fb="fb_buffets">
+					Буфети
+				</li>
+				<li class="menu_bathrooms_btn" data-fb="fb_bathrooms">
+					Вбиральні
+				</li>
+			</ul>
+		</div>
+		<div class="search_wr">
+			<div class="fb fb_free_auditorium">
+				<span class="some_label">Кількість (мінімум):</span>
+				<span class="select_label">розеток</span>
+				<input type="text" class="search_input search_input_digits search_input_sockets" maxlength="3" value="0">
+
+				<span class="select_label">місць</span>
+				<input type="text" class="search_input search_input_digits search_input_workplaces" maxlength="3" value="10">
+
+				<span class="select_label">проектор</span>
+				<select name="" id="" class="projector">
+					<option value="0">байдуже</option>
+					<option value="1">є</option>
+				</select>
+
+				<span class="select_label">день</span>
+				<select name="" id="" class="day">
+					<option value="1">понеділок</option>
+					<option value="2">вівторок</option>
+					<option value="3">середа</option>
+					<option value="4">четвер</option>
+					<option value="5">п’ятниця</option>
+					<option value="6">субота</option>
+					<option value="7">неділя</option>
+				</select>
+
+				<span class="select_label">пара</span>
+				<select name="" id="" class="period">
+					<option value="">1</option>
+					<option value="">2</option>
+					<option value="">3</option>
+					<option value="">4</option>
+					<option value="">5</option>
+					<option value="">6</option>
+					<option value="">7</option>
+					<option value="">8</option>
+				</select>
+
+				<button class="start_btn">Пуск</button>
+			</div>
+
+			<div class="fb fb_teacher">
+				<span class="select_label">Прізвище:</span>
+				<input type="text" class="search_input search_input_teacher search_input_teacherLastname" value="костін">
+				<span class="select_label">Ім'я:</span>
+				<input type="text" class="search_input search_input_teacher search_input_teacherName">
+				<span class="select_label">По батькові:</span>
+				<input type="text" class="search_input search_input_teacher search_input_teacherPatronymic">
+
+				<div class="some_line">
+					<span class="select_label">день</span>
+					<select name="" id="" class="day">
+						<option value="1">понеділок</option>
+						<option value="2">вівторок</option>
+						<option value="3">середа</option>
+						<option value="4">четвер</option>
+						<option value="5">п’ятниця</option>
+						<option value="6">субота</option>
+						<option value="7">неділя</option>
+					</select>
+					<button class="start_btn">Пуск</button>
+				</div>
+			</div>
+
+			<div class="fb fb_group">
+				<span class="select_label">Назва групи:</span>
+				<input type="text" class="search_input search_input_group" value="ІПЗ-11">
+				<span class="select_label">день</span>
+				<select name="" id="" class="day">
+					<option vвфнalue="1">понеділок</option>
+					<option value="2">вівторок</option>
+					<option value="3">середа</option>
+					<option value="4">четвер</option>
+					<option value="5">п’ятниця</option>
+					<option value="6">субота</option>
+					<option value="7">неділя</option>
+				</select>
+				<button class="start_btn">Пуск</button>
+			</div>
+
+			<div class="fb fb_auditorium">
+				<span class="select_label">Номер аудиторії:</span>
+				<input type="text" class="search_input search_input_auditorium" value="1.201">
+				<span class="select_label">день</span>
+				<select name="" id="" class="day">
+					<option vвфнalue="1">понеділок</option>
+					<option value="2">вівторок</option>
+					<option value="3">середа</option>
+					<option value="4">четвер</option>
+					<option value="5">п’ятниця</option>
+					<option value="6">субота</option>
+					<option value="7">неділя</option>
+				</select>
+				<button class="start_btn">Пуск</button>
+			</div>
+
+			<div class="fb fb_room fb_active">
+				<span class="select_label">Назва:</span>
+				<input type="text" class="search_input search_input_room" value="деканат ФКНТ">
+				<button class="start_btn">Пуск</button>
+			</div>
+
+			<div class="fb fb_buffets"></div>
+
+			<div class="fb fb_bathrooms"></div>
+			
+		</div>
+		<div class="preloader_wr">
+			<img src="assets/img/preloader.gif" alt="" class="preloader">
+		</div>
+
+		<div class="results_wr"></div>
+	</div>
+</body>
+</html>
