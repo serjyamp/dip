@@ -11,6 +11,7 @@
             $where = "NumberOfBuilding={$building['NumberOfBuilding']}";
             $sql = "SELECT * FROM Bathrooms WHERE " . $where;
             $bathrooms_query = mysql_query($sql);
+
             if (mysql_num_rows($bathrooms_query) > 0) {
                 echo "<div class='row_caption'><span>" . $building['NumberOfBuilding'] . "</span> корпус</div>";
             	echo "<div class='results_table'>";
@@ -27,12 +28,13 @@
                     for ($j = 1; $j <= $quantityOfFloors; $j++){
                         $k = 0;
                         $where = "(NumberOfBuilding={$building['NumberOfBuilding']}) AND (Floor='$j') AND (ForMenOrWomen='$mw')";
-                        $sql = "SELECT Floor, ForMenOrWomen FROM Bathrooms WHERE " . $where;
+                        $sql = "SELECT Floor, ForMenOrWomen, HowManyBathrooms FROM Bathrooms WHERE " . $where;
                         $bathrooms_query = mysql_query($sql);
+                        
                         if (mysql_num_rows($bathrooms_query) > 0) {
-                        	while($bathroom = mysql_fetch_array($bathrooms_query)){
-                                $k++;
-                        	};
+                        	$bathroom = mysql_fetch_array($bathrooms_query);
+                            $k = $bathroom['HowManyBathrooms'];
+
                             if ($k != 0){
                                 $hasResults = true;
                                 echo '<div class="lesson_header">' . $j . ' поверх: <span class="count_of_bathrooms">' . $k . '</span></div>';

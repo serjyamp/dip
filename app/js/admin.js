@@ -4,8 +4,9 @@ $(document).ready(function(){
 		$(".search_input_digits").keydown(function (e) {
 	        // Allow: backspace, delete, tab, escape, enter and .
 	        if ($.inArray(e.keyCode, [46, 8, 9, 27, 13, 110, 190]) !== -1 ||
-	             // Allow: Ctrl+A, Command+A
 	            (e.keyCode == 65 && ( e.ctrlKey === true || e.metaKey === true ) ) || 
+	            (e.keyCode == 67 && ( e.ctrlKey === true || e.metaKey === true ) ) || 
+	            (e.keyCode == 82 && ( e.ctrlKey === true || e.metaKey === true ) ) || 
 	             // Allow: home, end, left, right, down, up
 	            (e.keyCode >= 35 && e.keyCode <= 40)) {
 	                 // let it happen, don't do anything
@@ -23,6 +24,10 @@ $(document).ready(function(){
     function removeErrorOnKeypress(){
     	$('input').keypress(function(){
     		$(this).removeClass('empty_input');
+    	}).keydown(function(e){
+    		if (e.keyCode == 86 && (e.ctrlKey === true || e.metaKey === true)) {
+    			$(this).removeClass('empty_input');
+    		};
     	});
     };
 
@@ -32,10 +37,7 @@ $(document).ready(function(){
 
 	// admin menu clicking
 	$('.admin_menu li').click(function(){
-		$('.fields_controls').hide();
-		$('.status_wr').hide().html("");
-		$('.content_wr').hide().html("");
-		$('.preloader_wr').fadeIn(200);
+		hideElementsBeforeLoaded();
 
 		if (!$(this).hasClass('am_active')){
 			$('.am_active').removeClass('am_active');
@@ -43,10 +45,23 @@ $(document).ready(function(){
 		};
 	});
 
+	function hideElementsBeforeLoaded(noclean){
+		$('.fields_controls').hide();
+		$('.fields_active').hide();
+		$('.preloader_wr').fadeIn(200);
+		$('.status_wr').hide().html("");
+
+		if (noclean == 'noclean'){
+			$('.content_wr').hide();
+		} else {
+			$('.content_wr').hide().html("");
+		}
+	}
+
 	// init edit button in row
 	function initEditBtn(type){
 		$('.cell_edit').click(function(){
-			if (type == "groups" || type == "buildings"){
+			if (type == "groups" || type == "buffets" || type == "rooms"){
 				$(this).closest('.content_row').find('.content_cell_input').removeAttr('readonly').addClass('editing_input');
 				$(this).closest('.content_row').find('.content_cell_input').first().focus();
 				$(this).closest('.content_row').find('.cell_checkbox').attr('checked',false).attr('disabled',true);
@@ -57,9 +72,14 @@ $(document).ready(function(){
 				$(this).closest('.content_row').find('.content_cell_input').first().focus();
 				$(this).closest('.content_row').find('.cell_checkbox').attr('checked',false).attr('disabled',true);
 			};
-			if (type == "teachers" || type == "subjects"){
+			if (type == "teachers" || type == "subjects" || type == "bathrooms" || "buildings"){
 				$(this).closest('.content_row').find('.content_cell_input:not(.restrict)').removeAttr('readonly').addClass('editing_input');
 				$(this).closest('.content_row').find('.content_cell_input').eq(1).focus();
+				$(this).closest('.content_row').find('.cell_checkbox').attr('checked',false).attr('disabled',true);
+			};
+			if (type == "bathrooms"){
+				$(this).closest('.content_row').find('.content_cell_input:not(.restrict)').removeAttr('readonly').addClass('editing_input');
+				$(this).closest('.content_row').find('.content_cell_input').first().focus();
 				$(this).closest('.content_row').find('.cell_checkbox').attr('checked',false).attr('disabled',true);
 			};
 		});
@@ -73,7 +93,7 @@ $(document).ready(function(){
 			if ($(closest_row).find('.editing_input').length != 0){
 
 				var error = false;
-				$(closest_row).find('.editing_input').each(function(){
+				$(closest_row).find('.editing_input:not(.can_be_empty)').each(function(){
 					if ($(this).val().trim().length == 0){
 						$(this).addClass('empty_input');
 						error = true;
@@ -86,22 +106,20 @@ $(document).ready(function(){
 				}
 
 				if (type == 'groups'){
-					
-					$(closest_row).find('.content_cell_input').attr('readonly', 'true').removeClass('editing_input');
-					$(closest_row).find('.cell_checkbox').attr('disabled',false);
-
-					var oldVal = $(closest_row).attr('data-val');
-					var newVal = $(closest_row).find('.content_cell_input').val();
+					var old_NameOfGroup = $(closest_row).attr('data-val');
+					var NameOfGroup = $(closest_row).find('.cci_1').val();
 
 					$.ajax({
 						type: 'POST',
 						url: 'php/admin/groups_update.php',
-						data: 'oldVal=' + oldVal + '&newVal=' + newVal,
+						data: 'old_NameOfGroup=' + old_NameOfGroup + '&NameOfGroup=' + NameOfGroup,
 						success: function(data){
 							if (data == 'ok'){
-								$(closest_row).attr('data-val', newVal);
+								$(closest_row).find('.content_cell_input').attr('readonly', 'true').removeClass('editing_input');
+								$(closest_row).find('.cell_checkbox').attr('disabled',false);
+
+								$(closest_row).attr('data-val', NameOfGroup);
 							} else {
-								$(closest_row).find('.content_cell_input').val(oldVal);
 								alert('Такий запис в базі даних вже існує.');
 							}
 						}
@@ -109,24 +127,19 @@ $(document).ready(function(){
 					return;
 				};
 
-
 				if (type == 'buildings'){
-					$(closest_row).find('.content_cell_input').attr('readonly', 'true').removeClass('editing_input');
-					$(closest_row).find('.cell_checkbox').attr('disabled',false);
-
-					var old_NumberOfBuilding = $(closest_row).find('.cci_1').attr('data-val');
-					var NumberOfBuilding = $(closest_row).find('.cci_1').val();
+					var old_NumberOfBuilding = $(closest_row).attr('data-val');
 					var QuantityOfFloors = $(closest_row).find('.cci_2').val();
 
 					$.ajax({
 						type: 'POST',
 						url: 'php/admin/buildings_update.php',
-						data: 'old_NumberOfBuilding=' + old_NumberOfBuilding + '&NumberOfBuilding=' + NumberOfBuilding + '&QuantityOfFloors=' + QuantityOfFloors,
+						data: 'old_NumberOfBuilding=' + old_NumberOfBuilding + '&QuantityOfFloors=' + QuantityOfFloors,
 						success: function(data){
 							if (data == 'ok'){
-								$(closest_row).find('.cci_1').attr('data-val', NumberOfBuilding);
+								$(closest_row).find('.content_cell_input').attr('readonly', 'true').removeClass('editing_input');
+								$(closest_row).find('.cell_checkbox').attr('disabled',false);
 							} else {
-								$(closest_row).find('.cci_1').val(old_NumberOfBuilding);
 								alert('Такий запис в базі даних вже існує.');
 							}
 						}
@@ -237,6 +250,115 @@ $(document).ready(function(){
 					});
 					return;
 				};
+
+				if (type == 'buffets'){
+					var CodeOfBuffet = $(closest_row).attr('data-val');
+					var NameOfBuffet = $(closest_row).find('.cci_1').val().trim();
+					var BusinessHours = $(closest_row).find('.cci_2').val().trim();
+					var NumberOfBuilding = $(closest_row).find('.cci_3').val().trim();
+					var Floor = $(closest_row).find('.cci_4').val().trim();
+
+					$.ajax({
+						type: 'POST',
+						url: 'php/admin/buffets_update.php',
+						data: 'CodeOfBuffet=' + CodeOfBuffet + '&NameOfBuffet=' + NameOfBuffet + '&BusinessHours=' + BusinessHours + '&NumberOfBuilding=' + NumberOfBuilding + '&Floor=' + Floor,
+						success: function(data){
+							if (data == 'ok'){
+								$(closest_row).find('.content_cell_input').attr('readonly', 'true').removeClass('editing_input');
+								$(closest_row).find('.cell_checkbox').attr('disabled',false);
+							} else if (data == 'error') {
+								alert('Помилка. Повторіть операцію.');
+							} else {
+								alert(data);
+							};
+						}
+					});
+					return;
+				};
+
+				if (type == 'bathrooms'){
+					var CodeOfBathroom = $(closest_row).attr('data-val');
+					var NumberOfBuilding = $(closest_row).find('.cci_1').val().trim();
+					var Floor = $(closest_row).find('.cci_2').val().trim();
+					var ForMenOrWomen = $(closest_row).find('.cci_3').val().trim();
+					var HowManyBathrooms = $(closest_row).find('.cci_4').val().trim();
+
+					$.ajax({
+						type: 'POST',
+						url: 'php/admin/bathrooms_update.php',
+						data: 'CodeOfBathroom=' + CodeOfBathroom + '&NumberOfBuilding=' + NumberOfBuilding + '&Floor=' + Floor + '&ForMenOrWomen=' + ForMenOrWomen + '&HowManyBathrooms=' + HowManyBathrooms,
+						success: function(data){
+							if (data == 'ok'){
+								$(closest_row).find('.content_cell_input').attr('readonly', 'true').removeClass('editing_input');
+								$(closest_row).find('.cell_checkbox').attr('disabled',false);
+							} else if (data == 'error') {
+								alert('Помилка. Повторіть операцію.');
+							} else {
+								alert(data);
+							};
+						}
+					});
+					return;
+				};
+
+				if (type == 'rooms'){
+					var CodeOfRoom = $(closest_row).attr('data-val');
+					var NameOfRoom = $(closest_row).find('.cci_1').val().trim();
+					var Contacts = $(closest_row).find('.cci_2').val().trim();
+					var NumberOfAuditorium = $(closest_row).find('.cci_3').val().trim();
+					var NumberOfBuilding = $(closest_row).find('.cci_4').val().trim();
+					var Floor = $(closest_row).find('.cci_5').val().trim();
+
+
+					// check nums of buildings and floors
+					var aud_numbers = NumberOfAuditorium.replace(/D/g, '');
+					if (aud_numbers != ""){
+						var rtrn = false;
+						var err = "Помилка: ";
+						var err_length = err.length;
+
+						var aud_num_of_building = NumberOfAuditorium[0];
+						if (NumberOfBuilding != ""){
+							if (aud_num_of_building != NumberOfBuilding){
+								err += "корпус у номері аудиторії не співпадає зі вказаним корпусом приміщення";
+							};
+						};
+
+						var aud_floor = NumberOfAuditorium[2];
+						if (Floor != ""){
+							if (aud_floor != Floor){
+								if (err.length > err_length){
+									err += " та ";
+								}
+								err += "поверх у номері аудиторії не співпадає зі вказаним поверхом приміщення";
+							};
+						};
+
+						if (err.length > err_length){
+							err += ".";
+							alert(err);
+							return;
+						}
+					};
+
+					$.ajax({
+						type: 'POST',
+						url: 'php/admin/rooms_update.php',
+						data: 'CodeOfRoom=' + CodeOfRoom + '&NameOfRoom=' + NameOfRoom + '&Contacts=' + Contacts + '&NumberOfAuditorium=' + NumberOfAuditorium + '&NumberOfBuilding=' + NumberOfBuilding + '&Floor=' + Floor,
+						success: function(data){
+							if (data == 'ok'){
+								$(closest_row).find('.content_cell_input').attr('readonly', 'true').removeClass('editing_input');
+								$(closest_row).find('.cell_checkbox').attr('disabled',false);
+							} else if (data == 'error') {
+								alert('Помилка. Повторіть операцію.');
+							} else {
+								alert(data);
+							};
+						}
+					});
+					return;
+				};
+
 			};
 
 		});
@@ -251,6 +373,21 @@ $(document).ready(function(){
 			success: function(data){
 				setTimeout(function(){
 					$('.del_status_wr').html(data).show();
+					console.log(tableName);
+				}, 300);
+			}
+		});
+	};
+	// delete row query in BUILDINGS
+	function deleteRow_Buildings(tableName,fieldName,fieldValue){
+		$.ajax({
+			type: 'POST',
+			url: 'php/admin/delete_buildings.php',
+			data: "tableName=" + tableName + "&fieldName=" + fieldName + "&fieldValue=" + fieldValue,
+			success: function(data){
+				setTimeout(function(){
+					$('.del_status_wr').html(data).show();
+					console.log(tableName);
 				}, 300);
 			}
 		});
@@ -288,24 +425,28 @@ $(document).ready(function(){
 			    	initSetBtn('groups');
 			    	initUnfocusStatus();
 
-			    	$('.f_del').click(function(){
+			    	$('.f_del').unbind('click').click(function(){
 			    		var i = 0;
 
 			    		var tableName = 'Groups';
 			    		var fieldName = 'NameOfGroup';
 			    		var ch = $('.cell_checkbox:checked').length;
 
-			    		$('.cell_checkbox:checked').each(function(){
-			    			var fieldValue = $(this).closest('.content_row').find('.content_cell_input').val();
-			    			var res = deleteRow(tableName,fieldName,fieldValue);
-			    			i++;
-			    			if (i == ch){
-			    				setTimeout(function(){
-				    				var clss = '.' + $('.am_active').attr('class').split(' ')[0];
-									$(clss).click();
-			    				},300);
-			    			}
-			    		});
+			    		if (ch != 0){
+			    			hideElementsBeforeLoaded('noclean');
+
+				    		$('.cell_checkbox:checked').each(function(){
+				    			var fieldValue = $(this).closest('.content_row').find('.content_cell_input').val();
+				    			var res = deleteRow(tableName,fieldName,fieldValue);
+				    			i++;
+				    			if (i == ch){
+				    				setTimeout(function(){
+					    				var clss = '.' + $('.am_active').attr('class').split(' ')[0];
+										$(clss).click();
+				    				},300);
+				    			}
+				    		});
+			    		};
 			    	});
 
 			    	if (data != 0){
@@ -319,14 +460,18 @@ $(document).ready(function(){
 	$('.fields_groups .f_add').click(function(){
 		var fieldValue = $('.f_input_group').val().trim();
 		if (fieldValue.length != 0){
+			hideElementsBeforeLoaded();
+
 			$.ajax({
 				type: 'POST',
 				url: 'php/admin/groups_insert.php',
 				data: "fieldValue=" + fieldValue,
 				success: function(data){
-					$('.am_groups').click();
 					setTimeout(function(){
-						$('.add_status_wr').html(data).show();
+						$('.am_groups').click();
+						setTimeout(function(){
+							$('.add_status_wr').html(data).show();
+						}, 300);
 					}, 300);
 				}
 			});
@@ -358,24 +503,28 @@ $(document).ready(function(){
 			    	initUnfocusStatus();
 			    	onlyDigitsInput();
 
-			    	$('.f_del').click(function(){
+			    	$('.f_del').unbind('click').click(function(){
 			    		var i = 0;
 
 			    		var tableName = 'Buildings';
 			    		var fieldName = 'NumberOfBuilding';
 			    		var ch = $('.cell_checkbox:checked').length;
 
-			    		$('.cell_checkbox:checked').each(function(){
-			    			var fieldValue = $(this).closest('.content_row').find('.cci_1').val();
-			    			var res = deleteRow(tableName,fieldName,fieldValue);
-			    			i++;
-			    			if (i == ch){
-			    				setTimeout(function(){
-				    				var clss = '.' + $('.am_active').attr('class').split(' ')[0];
-									$(clss).click();
-			    				},300);
-			    			}
-			    		});
+			    		if (ch != 0){
+			    			hideElementsBeforeLoaded('noclean');
+
+				    		$('.cell_checkbox:checked').each(function(){
+				    			var fieldValue = $(this).closest('.content_row').find('.cci_1').val();
+				    			var res = deleteRow_Buildings(tableName,fieldName,fieldValue);
+				    			i++;
+				    			if (i == ch){
+				    				setTimeout(function(){
+					    				var clss = '.' + $('.am_active').attr('class').split(' ')[0];
+										$(clss).click();
+				    				},300);
+				    			}
+				    		});
+				    	};
 			    	});
 
 			    	if (data != 0){
@@ -392,14 +541,18 @@ $(document).ready(function(){
 
 		if (field_building_number.length != 0 && field_building_floors.length != 0)
 		{
+			hideElementsBeforeLoaded();
+
 			$.ajax({
 				type: 'POST',
 				url: 'php/admin/buildings_insert.php',
 				data: "field_building_number=" + field_building_number + '&field_building_floors=' + field_building_floors,
 				success: function(data){
-					$('.am_buildings').click();
 					setTimeout(function(){
-						$('.add_status_wr').html(data).show();
+						$('.am_buildings').click();
+						setTimeout(function(){
+							$('.add_status_wr').html(data).show();
+						}, 300);
 					}, 300);
 				}
 			});
@@ -427,31 +580,34 @@ $(document).ready(function(){
 					};
 
 				    $('.search_input_auditorium').mask('9.999');
-
 			    	initEditBtn('lessons');
 			    	initSetBtn('lessons');
 			    	initUnfocusStatus();
 			    	onlyDigitsInput();
 
-			    	$('.f_del').click(function(){
+			    	$('.f_del').unbind('click').click(function(){
 			    		var i = 0;
 
 			    		var tableName = 'Lessons';
 			    		var fieldName = 'CodeOfLesson';
 			    		var ch = $('.cell_checkbox:checked').length;
 
-			    		$('.cell_checkbox:checked').each(function(){
-			    			var fieldValue = $(this).closest('.content_row').attr('data-val');
-			    			console.log(fieldValue);
-			    			var res = deleteRow(tableName,fieldName,fieldValue);
-			    			i++;
-			    			if (i == ch){
-			    				setTimeout(function(){
-				    				var clss = '.' + $('.am_active').attr('class').split(' ')[0];
-									$(clss).click();
-			    				},300);
-			    			}
-			    		});
+			    		if (ch != 0){
+			    			hideElementsBeforeLoaded('noclean');
+
+				    		$('.cell_checkbox:checked').each(function(){
+				    			var fieldValue = $(this).closest('.content_row').attr('data-val');
+				    			console.log(fieldValue);
+				    			var res = deleteRow(tableName,fieldName,fieldValue);
+				    			i++;
+				    			if (i == ch){
+				    				setTimeout(function(){
+					    				var clss = '.' + $('.am_active').attr('class').split(' ')[0];
+										$(clss).click();
+				    				},300);
+				    			}
+				    		});
+				    	};
 			    	});
 
 			    	if (data != 0){
@@ -474,14 +630,19 @@ $(document).ready(function(){
 		var Week = $('.fields_lessons .week option:selected').val();
 
 		if (CodeOfSubject.length != 0 && CodeOfTeacher.length != 0 && NameOfGroup.length != 0 && NumberOfAuditorium.length != 0 && DayOfWeek.length != 0 && NumberOfDoublePeriod.length != 0 && Week.length != 0) {
+
+			hideElementsBeforeLoaded();
+
 			$.ajax({
 				type: 'POST',
 				url: 'php/admin/lessons_insert.php',
 				data: "CodeOfSubject=" + CodeOfSubject + '&CodeOfTeacher=' + CodeOfTeacher + '&NameOfGroup=' + NameOfGroup + '&NumberOfAuditorium=' + NumberOfAuditorium + '&DayOfWeek=' + DayOfWeek + '&NumberOfDoublePeriod=' + NumberOfDoublePeriod + '&Week=' + Week,
 				success: function(data){
-					$('.am_lessons').click();
 					setTimeout(function(){
-						$('.add_status_wr').html(data).show();
+						$('.am_lessons').click();
+						setTimeout(function(){
+							$('.add_status_wr').html(data).show();
+						}, 300);
 					}, 300);
 				}
 			});
@@ -515,24 +676,28 @@ $(document).ready(function(){
 
 			    	$('.search_input_auditorium').mask('9.999');
 
-			    	$('.f_del').click(function(){
+			    	$('.f_del').unbind('click').click(function(){
 			    		var i = 0;
 
 			    		var tableName = 'Auditoriums';
 			    		var fieldName = 'NumberOfAuditorium';
 			    		var ch = $('.cell_checkbox:checked').length;
 
-			    		$('.cell_checkbox:checked').each(function(){
-			    			var fieldValue = $(this).closest('.content_row').find('.cci_1').val();
-			    			var res = deleteRow(tableName,fieldName,fieldValue);
-			    			i++;
-			    			if (i == ch){
-			    				setTimeout(function(){
-				    				var clss = '.' + $('.am_active').attr('class').split(' ')[0];
-									$(clss).click();
-			    				},300);
-			    			}
-			    		});
+			    		if (ch != 0){
+			    			hideElementsBeforeLoaded('noclean');
+
+				    		$('.cell_checkbox:checked').each(function(){
+				    			var fieldValue = $(this).closest('.content_row').find('.cci_1').val();
+				    			var res = deleteRow(tableName,fieldName,fieldValue);
+				    			i++;
+				    			if (i == ch){
+				    				setTimeout(function(){
+					    				var clss = '.' + $('.am_active').attr('class').split(' ')[0];
+										$(clss).click();
+				    				},300);
+				    			}
+				    		});
+				    	};
 			    	});
 
 			    	if (data != 0){
@@ -551,14 +716,18 @@ $(document).ready(function(){
 
 		if (f_input_number_of_auditorium.length != 0 && f_input_sockets.length != 0 && f_input_workplaces.length != 0)
 		{
+			hideElementsBeforeLoaded();
+
 			$.ajax({
 				type: 'POST',
 				url: 'php/admin/auditoriums_insert.php',
 				data: "f_input_number_of_auditorium=" + f_input_number_of_auditorium + '&f_input_sockets=' + f_input_sockets + '&f_input_workplaces=' + f_input_workplaces + '&projector=' + projector,
 				success: function(data){
-					$('.am_auditoriums').click();
 					setTimeout(function(){
-						$('.add_status_wr').html(data).show();
+						$('.am_auditoriums').click();
+						setTimeout(function(){
+							$('.add_status_wr').html(data).show();
+						}, 300);
 					}, 300);
 				}
 			});
@@ -597,24 +766,28 @@ $(document).ready(function(){
 			    	initSetBtn('teachers');
 			    	initUnfocusStatus();
 
-			    	$('.f_del').click(function(){
+			    	$('.f_del').unbind('click').click(function(){
 			    		var i = 0;
 
 			    		var tableName = 'Teachers';
 			    		var fieldName = 'CodeOfTeacher';
 			    		var ch = $('.cell_checkbox:checked').length;
 
-			    		$('.cell_checkbox:checked').each(function(){
-			    			var fieldValue = $(this).closest('.content_row').attr('data-val');
-			    			var res = deleteRow(tableName,fieldName,fieldValue);
-			    			i++;
-			    			if (i == ch){
-			    				setTimeout(function(){
-				    				var clss = '.' + $('.am_active').attr('class').split(' ')[0];
-									$(clss).click();
-			    				},300);
-			    			}
-			    		});
+			    		if (ch != 0){
+			    			hideElementsBeforeLoaded('noclean');
+
+				    		$('.cell_checkbox:checked').each(function(){
+				    			var fieldValue = $(this).closest('.content_row').attr('data-val');
+				    			var res = deleteRow(tableName,fieldName,fieldValue);
+				    			i++;
+				    			if (i == ch){
+				    				setTimeout(function(){
+					    				var clss = '.' + $('.am_active').attr('class').split(' ')[0];
+										$(clss).click();
+				    				},300);
+				    			}
+				    		});
+				    	};
 			    	});
 
 			    	if (data != 0){
@@ -632,14 +805,18 @@ $(document).ready(function(){
 
 		if (lastname.length != 0 && name.length != 0 && patronymic.length != 0)
 		{
+			hideElementsBeforeLoaded();
+
 			$.ajax({
 				type: 'POST',
 				url: 'php/admin/teachers_insert.php',
 				data: "lastname=" + lastname + '&name=' + name + '&patronymic=' + patronymic,
 				success: function(data){
-					$('.am_teachers').click();
 					setTimeout(function(){
-						$('.add_status_wr').html(data).show();
+						$('.am_teachers').click();
+						setTimeout(function(){
+							$('.add_status_wr').html(data).show();
+						}, 300);
 					}, 300);
 				}
 			});
@@ -670,24 +847,28 @@ $(document).ready(function(){
 			    	initSetBtn('subjects');
 			    	initUnfocusStatus();
 
-			    	$('.f_del').click(function(){
+			    	$('.f_del').unbind('click').click(function(){
 			    		var i = 0;
 
 			    		var tableName = 'Subjects';
 			    		var fieldName = 'CodeOfSubject';
 			    		var ch = $('.cell_checkbox:checked').length;
 
-			    		$('.cell_checkbox:checked').each(function(){
-			    			var fieldValue = $(this).closest('.content_row').attr('data-val');
-			    			var res = deleteRow(tableName,fieldName,fieldValue);
-			    			i++;
-			    			if (i == ch){
-			    				setTimeout(function(){
-				    				var clss = '.' + $('.am_active').attr('class').split(' ')[0];
-									$(clss).click();
-			    				},300);
-			    			}
-			    		});
+			    		if (ch != 0){
+			    			hideElementsBeforeLoaded('noclean');
+
+				    		$('.cell_checkbox:checked').each(function(){
+				    			var fieldValue = $(this).closest('.content_row').attr('data-val');
+				    			var res = deleteRow(tableName,fieldName,fieldValue);
+				    			i++;
+				    			if (i == ch){
+				    				setTimeout(function(){
+					    				var clss = '.' + $('.am_active').attr('class').split(' ')[0];
+										$(clss).click();
+				    				},300);
+				    			}
+				    		});
+				    	};
 			    	});
 
 			    	if (data != 0){
@@ -703,14 +884,18 @@ $(document).ready(function(){
 
 		if (NameOfSubject.length != 0)
 		{
+			hideElementsBeforeLoaded();
+
 			$.ajax({
 				type: 'POST',
 				url: 'php/admin/subjects_insert.php',
 				data: "NameOfSubject=" + NameOfSubject,
 				success: function(data){
-					$('.am_subjects').click();
 					setTimeout(function(){
-						$('.add_status_wr').html(data).show();
+						$('.am_subjects').click();
+						setTimeout(function(){
+							$('.add_status_wr').html(data).show();
+						}, 300);
 					}, 300);
 				}
 			});
@@ -720,5 +905,255 @@ $(document).ready(function(){
 		}
 	});
 
+	// === BUFFETS ===
+	$('.am_buffets').click(function(){
+		$('.fields_active').hide();
+		$.ajax({
+			type: 'POST',
+			url: 'php/admin/buffets_main.php',
+			success: function(data){
+				$('.preloader_wr').fadeOut(200,function(){
+					$('.fields_buffets').show().addClass('fields_active');
+
+				    if (data != 0){
+				    	$('.content_wr').html(data).show();
+					} else {
+						var empty = "<span class='gray'>Таблиця порожня.</span>";
+						$('.content_wr').html(empty).show();
+					};
+
+			    	initEditBtn('buffets');
+			    	initSetBtn('buffets');
+			    	initUnfocusStatus();
+			    	onlyDigitsInput();
+
+			    	$('.f_del').unbind('click').click(function(){
+			    		var i = 0;
+
+			    		var tableName = 'Buffets';
+			    		var fieldName = 'CodeOfBuffet';
+			    		var ch = $('.cell_checkbox:checked').length;
+
+			    		if (ch != 0){
+			    			hideElementsBeforeLoaded('noclean');
+
+				    		$('.cell_checkbox:checked').each(function(){
+				    			var fieldValue = $(this).closest('.content_row').attr('data-val');
+				    			var res = deleteRow(tableName,fieldName,fieldValue);
+				    			i++;
+				    			if (i == ch){
+				    				setTimeout(function(){
+					    				var clss = '.' + $('.am_active').attr('class').split(' ')[0];
+										$(clss).click();
+				    				},300);
+				    			}
+				    		});
+				    	};
+			    	});
+
+			    	if (data != 0){
+			    		$('.fields_controls').show();
+			    	};
+				});
+			}
+		});
+	});
+
+	$('.fields_buffets .f_add').click(function(){
+		var NameOfBuffet = $('.fields_buffets .f_input_name_of_buffet').val().trim();
+		var BusinessHours = $('.fields_buffets .f_input_name_business').val().trim();
+		var NumberOfBuilding = $('.fields_buffets .f_input_number_of_building').val().trim();
+		var Floor = $('.fields_buffets .f_input_floor').val().trim();
+
+		if (NameOfBuffet.length != 0 && BusinessHours.length != 0 && NumberOfBuilding.length != 0 && Floor.length != 0)
+		{
+			hideElementsBeforeLoaded();
+
+			$.ajax({
+				type: 'POST',
+				url: 'php/admin/buffets_insert.php',
+				data: "NameOfBuffet=" + NameOfBuffet + "&BusinessHours=" + BusinessHours + "&NumberOfBuilding=" + NumberOfBuilding + "&Floor=" + Floor,
+				success: function(data){
+					setTimeout(function(){
+						$('.am_buffets').click();
+						setTimeout(function(){
+							$('.add_status_wr').html(data).show();
+						}, 300);
+					}, 300);
+				}
+			});
+		} else {
+			$th = $(this).parent();
+			setErrorOnFieldsInput($th);
+		}
+	});
+
+	// === BATHROOMS ===
+	$('.am_bathrooms').click(function(){
+		$('.fields_active').hide();
+		$.ajax({
+			type: 'POST',
+			url: 'php/admin/bathrooms_main.php',
+			success: function(data){
+				$('.preloader_wr').fadeOut(200,function(){
+					$('.fields_bathrooms').show().addClass('fields_active');
+
+				    if (data != 0){
+				    	$('.content_wr').html(data).show();
+					} else {
+						var empty = "<span class='gray'>Таблиця порожня.</span>";
+						$('.content_wr').html(empty).show();
+					};
+
+			    	initEditBtn('bathrooms');
+			    	initSetBtn('bathrooms');
+			    	initUnfocusStatus();
+			    	onlyDigitsInput();
+
+			    	$('.f_del').unbind('click').click(function(){
+			    		var i = 0;
+
+			    		var tableName = 'Bathrooms';
+			    		var fieldName = 'CodeOfBathroom';
+			    		var ch = $('.cell_checkbox:checked').length;
+
+			    		if (ch != 0){
+			    			hideElementsBeforeLoaded('noclean');
+
+				    		$('.cell_checkbox:checked').each(function(){
+				    			var fieldValue = $(this).closest('.content_row').attr('data-val');
+				    			var res = deleteRow(tableName,fieldName,fieldValue);
+				    			i++;
+				    			if (i == ch){
+				    				setTimeout(function(){
+					    				var clss = '.' + $('.am_active').attr('class').split(' ')[0];
+										$(clss).click();
+				    				},300);
+				    			}
+				    		});
+				    	};
+			    	});
+
+			    	if (data != 0){
+			    		$('.fields_controls').show();
+			    	};
+				});
+			}
+		});
+	});
+
+	$('.fields_bathrooms .f_add').click(function(){
+		var HowManyBathrooms = $('.fields_bathrooms .f_input_how_many_bathrooms').val().trim();
+		var ForMenOrWomen = $('.fields_bathrooms .bathrooms_type').val();
+		var NumberOfBuilding = $('.fields_bathrooms .f_input_number_of_building').val().trim();
+		var Floor = $('.fields_bathrooms .f_input_floor').val().trim();
+
+		if (HowManyBathrooms.length != 0 && ForMenOrWomen.length != 0 && NumberOfBuilding.length != 0 && Floor.length != 0)
+		{
+			hideElementsBeforeLoaded();
+			
+			$.ajax({
+				type: 'POST',
+				url: 'php/admin/bathrooms_insert.php',
+				data: "HowManyBathrooms=" + HowManyBathrooms + "&ForMenOrWomen=" + ForMenOrWomen + "&NumberOfBuilding=" + NumberOfBuilding + "&Floor=" + Floor,
+				success: function(data){
+					setTimeout(function(){
+						$('.am_bathrooms').click();
+						setTimeout(function(){
+							$('.add_status_wr').html(data).show();
+						}, 300);
+					}, 300);
+				}
+			});
+		} else {
+			$th = $(this).parent();
+			setErrorOnFieldsInput($th);
+		}
+	});
+
+	// === ROOMS ===
+	$('.am_rooms').click(function(){
+		$('.fields_active').hide();
+		$.ajax({
+			type: 'POST',
+			url: 'php/admin/rooms_main.php',
+			success: function(data){
+				$('.preloader_wr').fadeOut(200,function(){
+					$('.fields_rooms').show().addClass('fields_active');
+
+				    if (data != 0){
+				    	$('.content_wr').html(data).show();
+					} else {
+						var empty = "<span class='gray'>Таблиця порожня.</span>";
+						$('.content_wr').html(empty).show();
+					};
+
+					$('.search_input_auditorium').mask('9.999');
+			    	initEditBtn('rooms');
+			    	initSetBtn('rooms');
+			    	initUnfocusStatus();
+			    	onlyDigitsInput();
+
+			    	$('.f_del').unbind('click').click(function(){
+			    		var i = 0;
+
+			    		var tableName = 'Rooms';
+			    		var fieldName = 'CodeOfRoom';
+			    		var ch = $('.cell_checkbox:checked').length;
+
+			    		if (ch != 0){
+			    			hideElementsBeforeLoaded('noclean');
+
+				    		$('.cell_checkbox:checked').each(function(){
+				    			var fieldValue = $(this).closest('.content_row').attr('data-val');
+				    			var res = deleteRow(tableName,fieldName,fieldValue);
+				    			i++;
+				    			if (i == ch){
+				    				setTimeout(function(){
+					    				var clss = '.' + $('.am_active').attr('class').split(' ')[0];
+										$(clss).click();
+				    				},300);
+				    			}
+				    		});
+				    	};
+			    	});
+
+			    	if (data != 0){
+			    		$('.fields_controls').show();
+			    	};
+				});
+			}
+		});
+	});
+
+	$('.fields_rooms .f_add').click(function(){
+		var NameOfRoom = $('.fields_rooms .f_input_how_many_rooms').val().trim();
+		var Contacts = $('.fields_rooms .f_input_contacts').val().trim();
+		var NumberOfAuditorium = $('.fields_rooms .f_input_number_of_auditorium').val().trim();
+		var NumberOfBuilding = $('.fields_rooms .f_input_number_of_building').val().trim();
+		var Floor = $('.fields_rooms .f_input_floor').val().trim();
+
+		if (NameOfRoom.length != 0)
+		{
+			hideElementsBeforeLoaded();
+			
+			$.ajax({
+				type: 'POST',
+				url: 'php/admin/rooms_insert.php',
+				data: "NameOfRoom=" + NameOfRoom + "&Contacts=" + Contacts + "&NumberOfAuditorium=" + NumberOfAuditorium + "&NumberOfBuilding=" + NumberOfBuilding + "&Floor=" + Floor,
+				success: function(data){
+					setTimeout(function(){
+						$('.am_rooms').click();
+						setTimeout(function(){
+							$('.add_status_wr').html(data).show();
+						}, 300);
+					}, 300);
+				}
+			});
+		} else {
+			$th = $(this).parent();
+			setErrorOnFieldsInput($th);
+		}
+	});
 
 });

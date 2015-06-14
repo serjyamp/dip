@@ -209,3 +209,11 @@
 .f_input_number_of_auditorium {
 	width: 50px;
 }
+.content_table_rooms {
+	& .content_cell_4 {
+		width: 60px;
+	}
+	& .content_cell_5 {
+		width: 60px;
+	}
+}
