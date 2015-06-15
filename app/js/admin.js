@@ -140,7 +140,7 @@ $(document).ready(function(){
 								$(closest_row).find('.content_cell_input').attr('readonly', 'true').removeClass('editing_input');
 								$(closest_row).find('.cell_checkbox').attr('disabled',false);
 							} else {
-								alert('Такий запис в базі даних вже існує.');
+								alert('Помилка. Повторіть операцію.');
 							}
 						}
 					});
@@ -199,8 +199,7 @@ $(document).ready(function(){
 								var err = "Помилка. Мабуть така аудиторія вже існує."
 								alert(err);
 							} else {
-								var err = "Помилка. Неможливо додати аудиторію тому що корпуса з номером <b>" + data + "</b> не існує.";
-								alert(err);
+								alert(data);
 							};
 						}
 					});
@@ -306,45 +305,11 @@ $(document).ready(function(){
 					var NameOfRoom = $(closest_row).find('.cci_1').val().trim();
 					var Contacts = $(closest_row).find('.cci_2').val().trim();
 					var NumberOfAuditorium = $(closest_row).find('.cci_3').val().trim();
-					var NumberOfBuilding = $(closest_row).find('.cci_4').val().trim();
-					var Floor = $(closest_row).find('.cci_5').val().trim();
-
-
-					// check nums of buildings and floors
-					var aud_numbers = NumberOfAuditorium.replace(/D/g, '');
-					if (aud_numbers != ""){
-						var rtrn = false;
-						var err = "Помилка: ";
-						var err_length = err.length;
-
-						var aud_num_of_building = NumberOfAuditorium[0];
-						if (NumberOfBuilding != ""){
-							if (aud_num_of_building != NumberOfBuilding){
-								err += "корпус у номері аудиторії не співпадає зі вказаним корпусом приміщення";
-							};
-						};
-
-						var aud_floor = NumberOfAuditorium[2];
-						if (Floor != ""){
-							if (aud_floor != Floor){
-								if (err.length > err_length){
-									err += " та ";
-								}
-								err += "поверх у номері аудиторії не співпадає зі вказаним поверхом приміщення";
-							};
-						};
-
-						if (err.length > err_length){
-							err += ".";
-							alert(err);
-							return;
-						}
-					};
 
 					$.ajax({
 						type: 'POST',
 						url: 'php/admin/rooms_update.php',
-						data: 'CodeOfRoom=' + CodeOfRoom + '&NameOfRoom=' + NameOfRoom + '&Contacts=' + Contacts + '&NumberOfAuditorium=' + NumberOfAuditorium + '&NumberOfBuilding=' + NumberOfBuilding + '&Floor=' + Floor,
+						data: 'CodeOfRoom=' + CodeOfRoom + '&NameOfRoom=' + NameOfRoom + '&Contacts=' + Contacts + '&NumberOfAuditorium=' + NumberOfAuditorium,
 						success: function(data){
 							if (data == 'ok'){
 								$(closest_row).find('.content_cell_input').attr('readonly', 'true').removeClass('editing_input');
@@ -383,6 +348,20 @@ $(document).ready(function(){
 		$.ajax({
 			type: 'POST',
 			url: 'php/admin/delete_buildings.php',
+			data: "tableName=" + tableName + "&fieldName=" + fieldName + "&fieldValue=" + fieldValue,
+			success: function(data){
+				setTimeout(function(){
+					$('.del_status_wr').html(data).show();
+					console.log(tableName);
+				}, 300);
+			}
+		});
+	};
+	// delete row query in ROOMS
+	function deleteRow_Rooms(tableName,fieldName,fieldValue){
+		$.ajax({
+			type: 'POST',
+			url: 'php/admin/delete_rooms.php',
 			data: "tableName=" + tableName + "&fieldName=" + fieldName + "&fieldValue=" + fieldValue,
 			success: function(data){
 				setTimeout(function(){
@@ -443,7 +422,7 @@ $(document).ready(function(){
 				    				setTimeout(function(){
 					    				var clss = '.' + $('.am_active').attr('class').split(' ')[0];
 										$(clss).click();
-				    				},300);
+				    				},1000);
 				    			}
 				    		});
 			    		};
@@ -521,7 +500,7 @@ $(document).ready(function(){
 				    				setTimeout(function(){
 					    				var clss = '.' + $('.am_active').attr('class').split(' ')[0];
 										$(clss).click();
-				    				},300);
+				    				},1000);
 				    			}
 				    		});
 				    	};
@@ -604,7 +583,7 @@ $(document).ready(function(){
 				    				setTimeout(function(){
 					    				var clss = '.' + $('.am_active').attr('class').split(' ')[0];
 										$(clss).click();
-				    				},300);
+				    				},1000);
 				    			}
 				    		});
 				    	};
@@ -687,14 +666,14 @@ $(document).ready(function(){
 			    			hideElementsBeforeLoaded('noclean');
 
 				    		$('.cell_checkbox:checked').each(function(){
-				    			var fieldValue = $(this).closest('.content_row').find('.cci_1').val();
+				    			var fieldValue = $(this).closest('.content_row').attr('data-val');
 				    			var res = deleteRow(tableName,fieldName,fieldValue);
 				    			i++;
 				    			if (i == ch){
 				    				setTimeout(function(){
 					    				var clss = '.' + $('.am_active').attr('class').split(' ')[0];
 										$(clss).click();
-				    				},300);
+				    				},1000);
 				    			}
 				    		});
 				    	};
@@ -738,7 +717,7 @@ $(document).ready(function(){
 	});
 
 	function setErrorOnFieldsInput(th){
-		th.find('input').each(function(){
+		th.find('input:not(.can_be_empty)').each(function(){
 			if ($(this).val().trim().length == 0){
 				$(this).addClass('empty_input');
 			};
@@ -784,7 +763,7 @@ $(document).ready(function(){
 				    				setTimeout(function(){
 					    				var clss = '.' + $('.am_active').attr('class').split(' ')[0];
 										$(clss).click();
-				    				},300);
+				    				},1000);
 				    			}
 				    		});
 				    	};
@@ -865,7 +844,7 @@ $(document).ready(function(){
 				    				setTimeout(function(){
 					    				var clss = '.' + $('.am_active').attr('class').split(' ')[0];
 										$(clss).click();
-				    				},300);
+				    				},1000);
 				    			}
 				    		});
 				    	};
@@ -945,7 +924,7 @@ $(document).ready(function(){
 				    				setTimeout(function(){
 					    				var clss = '.' + $('.am_active').attr('class').split(' ')[0];
 										$(clss).click();
-				    				},300);
+				    				},1000);
 				    			}
 				    		});
 				    	};
@@ -1028,7 +1007,7 @@ $(document).ready(function(){
 				    				setTimeout(function(){
 					    				var clss = '.' + $('.am_active').attr('class').split(' ')[0];
 										$(clss).click();
-				    				},300);
+				    				},1000);
 				    			}
 				    		});
 				    	};
@@ -1098,21 +1077,21 @@ $(document).ready(function(){
 			    		var i = 0;
 
 			    		var tableName = 'Rooms';
-			    		var fieldName = 'CodeOfRoom';
+			    		var fieldName = 'NameOfRoom';
 			    		var ch = $('.cell_checkbox:checked').length;
 
 			    		if (ch != 0){
 			    			hideElementsBeforeLoaded('noclean');
 
 				    		$('.cell_checkbox:checked').each(function(){
-				    			var fieldValue = $(this).closest('.content_row').attr('data-val');
-				    			var res = deleteRow(tableName,fieldName,fieldValue);
+				    			var fieldValue = $(this).closest('.content_row').find('.cci_1').val();
+				    			var res = deleteRow_Rooms(tableName,fieldName,fieldValue);
 				    			i++;
 				    			if (i == ch){
 				    				setTimeout(function(){
 					    				var clss = '.' + $('.am_active').attr('class').split(' ')[0];
 										$(clss).click();
-				    				},300);
+				    				},1000);
 				    			}
 				    		});
 				    	};
@@ -1127,20 +1106,18 @@ $(document).ready(function(){
 	});
 
 	$('.fields_rooms .f_add').click(function(){
-		var NameOfRoom = $('.fields_rooms .f_input_how_many_rooms').val().trim();
+		var NameOfRoom = $('.fields_rooms .f_input_name_of_room').val().trim();
 		var Contacts = $('.fields_rooms .f_input_contacts').val().trim();
 		var NumberOfAuditorium = $('.fields_rooms .f_input_number_of_auditorium').val().trim();
-		var NumberOfBuilding = $('.fields_rooms .f_input_number_of_building').val().trim();
-		var Floor = $('.fields_rooms .f_input_floor').val().trim();
 
-		if (NameOfRoom.length != 0)
+		if (NameOfRoom.length != 0 && NumberOfAuditorium.length != 0)
 		{
 			hideElementsBeforeLoaded();
 			
 			$.ajax({
 				type: 'POST',
 				url: 'php/admin/rooms_insert.php',
-				data: "NameOfRoom=" + NameOfRoom + "&Contacts=" + Contacts + "&NumberOfAuditorium=" + NumberOfAuditorium + "&NumberOfBuilding=" + NumberOfBuilding + "&Floor=" + Floor,
+				data: "NameOfRoom=" + NameOfRoom + "&Contacts=" + Contacts + "&NumberOfAuditorium=" + NumberOfAuditorium,
 				success: function(data){
 					setTimeout(function(){
 						$('.am_rooms').click();

@@ -1,7 +1,7 @@
 <?php
 	include('../db_connect.php');
 	
-    $sql = "SELECT * FROM Lessons";
+    $sql = "SELECT * FROM Lessons ORDER BY NameOfGroup";
     $query = mysql_query($sql);
     if (mysql_num_rows($query) > 0){
     	echo '<div class="content_table content_table_lessons">';

@@ -20,7 +20,7 @@
 	};
 
 	if (strcmp($where, "") != 0){
-	    $sql = "SELECT CodeOfRoom, NameOfRoom FROM Rooms_c WHERE " . $where;
+	    $sql = "SELECT NameOfRoom FROM Rooms_c WHERE " . $where;
 	    $query = mysql_query($sql);
 	    if (mysql_num_rows($query) > 0){
 	    	while ($room=mysql_fetch_array($query)){
@@ -29,14 +29,14 @@
 	    		$building_num = "";
 	    		$f = "";
 
-	    		$sql_2 = "SELECT Contacts, NumberOfAuditorium, NumberOfBuilding, Floor FROM Rooms WHERE CodeOfRoom={$room['CodeOfRoom']}";
+	    		$sql_2 = "SELECT Contacts, NumberOfAuditorium FROM Rooms WHERE NameOfRoom='" . $room['NameOfRoom'] . "'";
 	    		$query_2 = mysql_query($sql_2);
 	    		if (mysql_num_rows($query_2) > 0){
 	    			$aud = mysql_fetch_array($query_2);
 	    			$c = $aud['Contacts'];
 	    			$aud_num = $aud['NumberOfAuditorium'];
-	    			$building_num = $aud['NumberOfBuilding'];
-	    			$f = $aud['Floor'];
+	    			$building_num = $aud_num{0};
+	    			$f = $aud_num{2};
 	    		};
 	    		
 	    		$contacts = "";
@@ -54,7 +54,7 @@
 	    			$number_of_building = "<b>" . $building_num . "</b> корпус<br>";
 	    			$k++;
 	    		};
-	    		if (empty($f) == false){
+	    		if (empty($f) == false || $f == 0){
 	    			$floor = "<b>" . $f . "</b> поверх<br>";
 	    			$k++;
 	    		};
